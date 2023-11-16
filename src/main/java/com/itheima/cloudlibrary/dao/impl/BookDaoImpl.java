@@ -22,7 +22,7 @@ public class BookDaoImpl implements BookDao {
             throws SQLException {
         QueryRunner qr = new QueryRunner(JDBCUtils.getDataSource());
         //补充SQL命令，实现展示最新上架的新书，显示5本最新书信息
-        String sql = "SELECT * FROM book WHERE status!=3 ORDER BY uploadtime DESC LIMIT 5";
+        String sql = "SELECT * FROM book WHERE status!=3 ORDER BY uploadtime DESC LIMIT ?";
         return qr.query(sql,
                 new BeanListHandler<Book>(Book.class), pageSize);
     }
