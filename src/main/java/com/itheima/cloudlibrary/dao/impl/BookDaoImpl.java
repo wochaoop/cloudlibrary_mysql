@@ -22,16 +22,15 @@ public class BookDaoImpl implements BookDao {
             throws SQLException {
         QueryRunner qr = new QueryRunner(JDBCUtils.getDataSource());
         //补充SQL命令，实现展示最新上架的新书，显示5本最新书信息
-        String sql = " ";
-        List<Book> newBooks = qr.query(sql,
+        String sql = "SELECT * FROM book WHERE status!=3 ORDER BY uploadtime DESC LIMIT 5";
+        return qr.query(sql,
                 new BeanListHandler<Book>(Book.class), pageSize);
-        return newBooks;
     }
     @Override
     public Book findById(String id) throws SQLException {
         QueryRunner qr = new QueryRunner(JDBCUtils.getDataSource());
         //补充SQL命令，实现根据图书编号
-        String sql = " ";
+        String sql = "SELECT * FROM book WHERE id=?";
         Book book = qr.query(sql, new BeanHandler<Book>(Book.class), id);
         return book;
     }
@@ -39,19 +38,20 @@ public class BookDaoImpl implements BookDao {
     public Integer editBook(Book book) throws SQLException {
         QueryRunner qr = new QueryRunner(JDBCUtils.getDataSource());
        //补充SQL命令，实现书借阅后，相关信息的更新
-        String sql = "";
+        String sql = "UPDATE book SET name=?,press=?,author=?,pagination=?," +
+                "price=?,status=?,borrower=?,borrowtime=?,returntime=? WHERE id=?";
         Object[] params={book.getName(),book.getPress(),book.getAuthor(),
                 book.getPagination(),book.getPrice(),book.getStatus(),
                 book.getBorrower(),book.getBorrowTime(),
                 book.getReturnTime(),book.getId()};
-        Integer count = qr.update(sql, params);
-        return count.intValue();
+        return qr.update(sql, params);
     }
     @Override
     public Integer addBook(Book book) throws SQLException {
         QueryRunner qr = new QueryRunner(JDBCUtils.getDataSource());
         //补充SQL命令，实现书借阅后，相关信息的更新
-        String sql = "";
+        String sql = "INSERT INTO book (name,press,author,pagination," +
+                "price,uploadtime,status) VALUES(?,?,?,?,?,?,?)";
         Object[] params={book.getName(),book.getPress(),book.getAuthor(),
                 book.getPagination(),book.getPrice(),book.getUploadTime(),book.getStatus()};
         Integer count = qr.update(sql, params);
@@ -63,7 +63,7 @@ public class BookDaoImpl implements BookDao {
     public Integer findBorrowedCount(String name) throws SQLException {
         QueryRunner queryRunner = new QueryRunner(JDBCUtils.getDataSource());
         //补充SQL命令
-        String sql = " ";
+        String sql = "SELECT count(*) FROM book WHERE borrower=? AND status IN(1,2) ";
         Long count = (Long)queryRunner.query(sql, new ScalarHandler());
         return count.intValue();
     }
@@ -73,9 +73,8 @@ public class BookDaoImpl implements BookDao {
     public List<Book> findPageByBorrower(String name, Integer begin, Integer pageSize) throws SQLException {
         QueryRunner queryRunner = new QueryRunner(JDBCUtils.getDataSource());
         //补充SQL命令
-        String sql = "";
-        List<Book> borrowedBooks = queryRunner.query(sql, new BeanListHandler<Book>(Book.class),name,begin,pageSize);
-        return borrowedBooks;
+        String sql = "SELECT count(*) FROM book WHERE borrower=? AND status IN(1,2) ORDER BY borrowtime ASC  LIMIT ?,?";
+        return queryRunner.query(sql, new BeanListHandler<Book>(Book.class),name,begin,pageSize);
     }
 
     @Override
@@ -83,7 +82,8 @@ public class BookDaoImpl implements BookDao {
         QueryRunner qr = new QueryRunner(JDBCUtils.getDataSource());
         //查询已借阅和归还中的图书
         //补充SQL命令
-        StringBuilder sql = new StringBuilder("");
+        StringBuilder sql = new StringBuilder("SELECT count(*) FROM book " +
+                "WHERE status IN(1,2) ");
         List<Object> params = new ArrayList<Object>();
         //如果当前登录用户不是管理员，则只查询借阅人为当前登录用户的信息
         if(!"ADMIN".equals(user.getRole())){
@@ -142,9 +142,8 @@ public class BookDaoImpl implements BookDao {
         sql.append(" ORDER BY borrowtime ASC  LIMIT ?,?");
         params.add(begin);
         params.add(pageSize);
-        List<Book> borrowedBooks = qr.query(sql.toString(),
+        return qr.query(sql.toString(),
                 new BeanListHandler<Book>(Book.class),params.toArray());
-        return borrowedBooks;
     }
 
     @Override
@@ -201,8 +200,7 @@ public class BookDaoImpl implements BookDao {
         sql.append(" ORDER BY uploadtime ASC  LIMIT ?,?");
         params.add(begin);
         params.add(pageSize);
-        List<Book> bookList = qr.query(sql.toString(),
+        return qr.query(sql.toString(),
                 new BeanListHandler<Book>(Book.class),params.toArray());
-        return bookList;
     }
 }

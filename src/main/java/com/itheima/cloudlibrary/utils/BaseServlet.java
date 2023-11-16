@@ -27,7 +27,7 @@ public class BaseServlet extends HttpServlet{
 			}
 			// 获得Class:
 			// this如果创建的是父类的对象，this指代的是父类引用，如果创建的是子类的对象，this指代的是子类的对象。
-			Class clazz = this.getClass();
+			Class<? extends BaseServlet> clazz = this.getClass();
 			// 反射获得该方法:
 			Method method = clazz.getMethod(methodName, HttpServletRequest.class,HttpServletResponse.class);
 			// 执行该方法:
