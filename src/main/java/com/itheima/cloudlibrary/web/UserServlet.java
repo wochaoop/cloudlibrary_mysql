@@ -28,10 +28,7 @@ public class UserServlet extends BaseServlet {
         // 调用业务层的登录方法
         UserService userService =
                 (UserService) BeanFactory.getBean("userService");
-        User existUser = null;
-        if (userService != null) {
-            existUser = userService.login(user);
-        }
+        User existUser = userService.login(user);
         // 根据登录结果进行页面跳转
         if (existUser == null) {
             // 登录失败

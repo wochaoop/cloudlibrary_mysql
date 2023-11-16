@@ -16,8 +16,10 @@ import org.dom4j.io.SAXReader;
 public class BeanFactory {
 	/**
 	 * 提供获得对象实例的方法:
-	 *
-     */
+	 * 
+	 * @param id
+	 * @return
+	 */
 	public static Object getBean(String id) {
 		try {
 			// 解析XML
@@ -30,14 +32,14 @@ public class BeanFactory {
 			// 获得这个bean标签下的class属性的值
 			String value = beanElement.attributeValue("class");// com.itheima.store.dao.impl.UserDaoImpl
 			// 反射
-			Class<?> clazz = Class.forName(value);
+			Class clazz = Class.forName(value);
 			final Object obj = clazz.newInstance();
 			// 使用动态代理对所有DAO产生代理类:
 			if(id.endsWith("Dao")){
 				// 产生动态代理:
-                return Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), new InvocationHandler() {
+				Object proxy = Proxy.newProxyInstance(clazz.getClassLoader(), clazz.getInterfaces(), new InvocationHandler() {
 					@Override
-					public Object invoke(Object proxy1, Method method, Object[] args) throws Throwable {
+					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 						if("save".equals(method.getName())){
 							// 在save之前做权限校验:
 							System.out.println("=====权限校验=====");
@@ -50,6 +52,7 @@ public class BeanFactory {
 						return method.invoke(obj, args);
 					}
 				});
+				return proxy;
 			}
 			
 			return obj;

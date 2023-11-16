@@ -14,15 +14,17 @@ public class UserDaoImpl  implements UserDao {
     public User login(User user) throws SQLException {
         QueryRunner qr = new QueryRunner(JDBCUtils.getDataSource());
         //请补充SQL命令，实现登录时的用户名和密码核验
-        String sql = "SELECT * FROM user WHERE email=? AND password=? AND status = ?";
-        return qr.query(sql, new BeanHandler<User>(User.class),user.getEmail(), user.getPassword(), 0);
+        String sql = "SELECT * FROM user WHERE email = ? AND password = ? AND status= ?";
+        User existUser = qr.query(sql, new BeanHandler<User>(User.class),user.getEmail(), user.getPassword(), 0);
+        return existUser;
     }
 
     @Override
     public User findByUsername(String username) throws SQLException {
         QueryRunner queryRunner = new QueryRunner(JDBCUtils.getDataSource());
         String sql = "SELECT * FROM user WHERE username=? status = 0";
-        return queryRunner.query(sql, new BeanHandler<User>(User.class), username);
+        User existUser = queryRunner.query(sql, new BeanHandler<User>(User.class), username);
+        return existUser;
     }
 
 }

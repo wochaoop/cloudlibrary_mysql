@@ -28,7 +28,8 @@ public class JDBCUtils {
 	}
 	/**
 	 * 获得连接
-     */
+	 * @throws Exception 
+	 */
 	public static Connection getConnection() throws Exception{
 		return dataSource.getConnection();
 	}
